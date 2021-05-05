@@ -1,0 +1,61 @@
+{
+  "name": "arkgacha",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron main.js",
+    "dist-win32": "electron-builder --win --ia32",
+    "dist-win64": "electron-builder --win --x64",
+    "dist-mac": "electron-builder --mac"
+  },
+  "build": {
+    "productName": "arkgacha",
+    "appId": "org.arkgacha.arkgacha",
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+      "main.js",
+      "index.html"
+    ],
+    "dmg": {
+      "contents": [
+        {
+          "x": 410,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 150,
+          "type": "file"
+        }
+      ]
+    },
+    "mac": {
+      "icon": "build/icons/icon.icns",
+      "artifactName": "${productName}_setup_${version}.${ext}"
+    },
+    "win": {
+      "icon": "build/icons/icon.ico",
+      "artifactName": "${productName}_setup_${version}.${ext}"
+    },
+    "linux": {
+      "icon": "build/icons",
+      "artifactName": "${productName}_setup_${version}.${ext}"
+    }
+  },
+  "author": "cibimo <https://github.com/cibimo>",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^12.0.6"
+  },
+  "dependencies": {
+    "fs-extra": "^8.1.0",
+    "universalify": "^0.1.2",
+    "electron-fetch": "^1.7.3",
+    "echarts": "^5.1.1"
+  },
+  "description": ""
+}

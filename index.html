@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-cn" style="height: 100%">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <title>明日方舟寻访记录分析</title>
+        <script>
+            // 接受uid
+            const ipc = require('electron').ipcRenderer
+            ipc.on('uid',(event, uid) => {
+                document.getElementById('uid').innerText = uid
+            })
+            ipc.on('log',(event, log) => {
+                document.getElementById('log').innerText = log
+            })
+            ipc.on('draw',(event, option) => {
+                const echarts = require('echarts')
+                echarts.dispose(document.getElementById('draw'))
+                var myChart = echarts.init(document.getElementById('draw'))
+                option && myChart.setOption(option)
+                document.getElementById("detail").style.visibility = "visible"
+                document.getElementById("get").disabled = false
+            })
+            ipc.on('detail',(event, detail) => {
+                document.getElementById('allgachanum').innerText = detail['allgachanum']
+                document.getElementById('char5_current').innerText = detail['char5_current']
+                document.getElementById('char5_count').innerText = detail['char5_count']
+                document.getElementById('char4_count').innerText = detail['char4_count']
+                document.getElementById('char3_count').innerText = detail['char3_count']
+                document.getElementById('char2_count').innerText = detail['char2_count']
+                document.getElementById('char5_percent').innerText = detail['char5_percent']
+                document.getElementById('char4_percent').innerText = detail['char4_percent']
+                document.getElementById('char3_percent').innerText = detail['char3_percent']
+                document.getElementById('char2_percent').innerText = detail['char2_percent']
+                document.getElementById('char5_history').innerText = detail['char5_history']
+                document.getElementById('char4_history').innerText = detail['char4_history']
+                document.getElementById('char5_historyavg').innerText = detail['char5_historyavg']
+                document.getElementById('char4_historyavg').innerText = detail['char4_historyavg']
+            })
+            ipc.on('loadfail',(event) => {
+                document.getElementById("get").disabled = false
+            })
+        </script>
+    </head>
+    <body style="height: 100%; margin: 0">
+        <div class="container" style="height: 100%">
+            <br>
+            <div class="form-row align-items-center">
+                <div class="col-md-6 mb-1"><button id="add" type="button" class="btn btn-primary">登录账号</button></div>
+                <div class="col-md-6 mb-1" style="text-align:right"><a style="color:grey">当前用户：</a><strong id="uid">未登录</strong></div>
+            </div>
+            <small style="color:grey">如需更换账号请进入登出后重新登录</small>
+            <script>
+                // 请求打开登录页面
+                const add = document.querySelector("#add")
+                add.onclick = () => {
+                    ipc.send('add')
+                }
+            </script>
+            <br>
+            <br>
+            <button id="get" type="button" class="btn btn-success btn-sm" disabled="true">更新数据</button>
+            <script>
+                // 请求打开登录页面
+                const get = document.querySelector("#get")
+                get.onclick = () => {
+                    document.getElementById("get").disabled = true
+                    ipc.send('get')
+                }
+            </script>
+            <br>
+            <small id="log" style="color:grey">请先登录账号</small>
+            <br>
+            <div class="form-row align-items-center" style="height: 70%">
+                <div class="col-md-7 mb-5" style="height: 100%">
+                    <div id="draw" style="height: 100%"></div>
+                </div>
+                <div class="col-md-5 mb-5" style="height: 100%">
+                    <div id="detail" style="height: 100%; visibility: hidden">
+                        <h5>详细数据：</h5>
+                            <div class="form-row align-items-center">
+                                <div class="col-md-4 mb-1">
+                                    总计 <a style="color:red" id='allgachanum'></a> 抽
+                                </div>
+                                <div class="col-md-8 mb-1" style="text-align: right;">
+                                    已累计 <a style="color:red" id='char5_current'></a> 抽未出 6 星
+                                </div>
+                            </div>
+
+                        <table class="table-sm small col"><thead></thead><tbody>
+                            <tr align="center" style="color:rgb(248, 110, 31)"><td>6星</td><td>共 <a id="char5_count"></a></td><td>占 <a id="char5_percent"></a></td></tr>
+                            <tr align="center" style="color:rgb(248, 170, 54)"><td>5星</td><td>共 <a id="char4_count"></a></td><td>占 <a id="char4_percent"></a></td></tr>
+                            <tr align="center" style="color:rgb(160, 53, 248)"><td>4星</td><td>共 <a id="char3_count"></a></td><td>占 <a id="char3_percent"></a></td></tr>
+                            <tr align="center" style="color:grey"><td>3星</td><td>共<a id="char2_count"></a></td><td>占<a id="char2_percent"></a></td></tr>
+                        </tbody></table>
+                        <small>6星平均出货次数为： <a style="color:rgb(248, 110, 31)" id='char5_historyavg'></a></small>
+                        <br>
+                        <small>5星平均出货次数为： <a style="color:rgb(248, 170, 54)" id='char4_historyavg'></a></small>
+                        <br>
+                        <small>6星历史记录：<br><a style="color:rgb(248, 110, 31)" id='char5_history'></a></small>
+                        <br>
+                        <small>5星历史记录：<br><a style="color:rgb(248, 170, 54)" id='char4_history'></a></small>
+
+
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+    </body>
+</html>
