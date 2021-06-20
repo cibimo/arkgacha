@@ -10,10 +10,10 @@
         <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
         <title>明日方舟寻访记录分析</title>
         <script>
-            // 接受uid
+            // 接收
             const ipc = require('electron').ipcRenderer
-            ipc.on('uid',(event, uid) => {
-                document.getElementById('uid').innerText = uid
+            ipc.on('username',(event, username) => {
+                document.getElementById('username').innerText = username
             })
             ipc.on('log',(event, log) => {
                 document.getElementById('log').innerText = log
@@ -52,7 +52,7 @@
             <br>
             <div class="form-row align-items-center">
                 <div class="col-md-6 mb-1"><button id="add" type="button" class="btn btn-primary">登录账号</button></div>
-                <div class="col-md-6 mb-1" style="text-align:right"><a style="color:grey">当前用户：</a><strong id="uid">未登录</strong></div>
+                <div class="col-md-6 mb-1" style="text-align:right"><a style="color:grey">当前用户：</a><strong id="username">未登录</strong></div>
             </div>
             <small style="color:grey">如需更换账号请进入登出后重新登录</small>
             <script>

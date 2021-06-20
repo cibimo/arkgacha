@@ -65,29 +65,29 @@ const requestRaw = async (url) => {
   return await res.text()
 }
 
-var HG_ACCOUNT = null
-var COOKIE = null
+var TOKEN = null
 var UID = null
 var isarkWindowopen = false
 
-const setHG = async (hg) => {
+const setUser = async () => {
   try {
-    var rsp = await requestRaw("https://ak.hypergryph.com/user/home")
+    const res = await fetch("https://as.hypergryph.com/u8/user/info/v1/basic", {
+      method: 'POST',
+      timeout: 15 * 1000,
+      body: `{"appId":1,"channelMasterId":1,"channelToken":{"token":"${TOKEN}"}}`,
+      redirect: 'follow'
+    })
+    var rsp = await res.json()
+    var uid = rsp['data']['uid']
+    var username = rsp['data']['nickName']
   } catch (e) {
-    sendLog("尝试验证 HG_ACCOUNT 失败", "failed")
+    sendLog("token 无效", "failed")
     return false
   }
-  try {
-    var uid = rsp.match(/\"uid\":.*?(?=,)/)[0].match(/\d+/)[0]
-  } catch (e) {
-    sendLog("HG_ACCOUNT 无效", "failed")
-    return false
-  }
-  COOKIE = hg
   UID = uid
-  mainWindow.webContents.send('uid', uid)
-  mainWindow.webContents.send('log', "HG_ACCOUNT验证成功 uid:"+UID+" 尝试读取现有数据")
-  sendLog("HG_ACCOUNT="+COOKIE+" 验证成功 uid: "+UID, "success")
+  mainWindow.webContents.send('username', username)
+  mainWindow.webContents.send('log', "token验证成功 uid:"+UID+" 尝试读取现有数据")
+  sendLog("token="+TOKEN+" 验证成功 uid: "+UID, "success")
   if (!(arkWindow === null)) {
     arkWindow.close()
   }
@@ -212,6 +212,7 @@ const drawData = async () => {
     mainWindow.webContents.send('detail', detail)
     mainWindow.webContents.send('log', `加载完毕`)
 }
+
 const getCookie = async () => {
   arkWindow = new BrowserWindow({width:400,height:600})
   arkWindow.loadURL('https://ak.hypergryph.com/user/inquiryGacha')
@@ -226,12 +227,12 @@ const getCookie = async () => {
     try {
       arkWindow.webContents.session.cookies.get({}).then((cookies) => {
         for (var cookie in cookies) {
-          if (cookies[cookie].name === 'HG_ACCOUNT') {
+          if (cookies[cookie].name === 'token') {
             var timestamp = Date.parse(new Date())
             if (cookies[cookie].expirationDate*1000 > timestamp) {
-              if (cookies[cookie].value != HG_ACCOUNT) {
-                HG_ACCOUNT = cookies[cookie].value
-                setHG(cookies[cookie].value)
+              if (cookies[cookie].value != TOKEN) {
+                TOKEN = cookies[cookie].value
+                setUser()
               }
             }
           }
@@ -300,7 +301,8 @@ const dateFormat = (fmt, timestamp) => {
 }
 
 const getGachaRecords = async (page) => {
-  gachaRecord = await requestJson(`https://ak.hypergryph.com/user/api/inquiry/gacha?page=${page}`)
+  var token = TOKEN.replace('+','%2B')
+  gachaRecord = await requestJson(`https://ak.hypergryph.com/user/api/inquiry/gacha?page=${page}&token=${token}`)
   userGachaList = await readJSON(`gacha-list-${UID}.json`)
   if (userGachaList == null) {
     userGachaList = {}
